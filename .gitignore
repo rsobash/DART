@@ -1,0 +1,18 @@
+# DART documentation
+*.html
+
+# DART svn folders
+.svn
+
+# DART namelists
+*.nml
+
+# DART pdf and ps files
+*.pdf
+*.ps
+
+# DART matlab code
+*.m
+
+# DART object files
+*.o
