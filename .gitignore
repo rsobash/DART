@@ -5,7 +5,7 @@
 .svn
 
 # DART namelists
-*.nml
+#*.nml
 
 # DART pdf and ps files
 *.pdf
