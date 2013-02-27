@@ -1,8 +1,13 @@
+# .gitignore tells Git what files to not keep track of
+
 # DART documentation
 *.html
 
-# DART svn folders
+# DART svn/work/test folders
 .svn
+work
+test
+tests
 
 # DART namelists
 #*.nml
@@ -16,3 +21,59 @@
 
 # DART object files
 *.o
+
+# specific DART directories I don't care about
+DART_LAB
+doc
+models/9var/
+models/MITgcm_annulus/
+models/MITgcm_ocean/
+models/NCOMMAS/
+models/PBL_1d/
+models/POP/
+models/am2/
+models/bgrid_solo/
+models/cam/
+models/coamps/
+models/coamps_nest/
+models/forced_barot/
+models/forced_lorenz_96/
+models/ikeda/
+models/lorenz_04/
+models/lorenz_63/
+models/lorenz_84/
+models/lorenz_96/
+models/lorenz_96_2scale/
+models/null_model/
+models/pe2lyr/
+models/rose/
+models/simple_advection/
+models/template/
+models/tiegcm/
+models/wrf/namelist
+models/wrf/regression
+ncep_obs
+observations/AIRS/
+observations/GTSPP/
+observations/MADIS/data/
+observations/NCEP/
+observations/README
+observations/SSEC/
+observations/WOD/
+observations/buildall.csh
+observations/gps/
+observations/obs_error/
+observations/quikscat/
+observations/radar/examples/
+observations/text/data/
+observations/utilities/oned/
+observations/utilities/threed_sphere/
+observations/var/
+random_nr/input.nml
+random_nr/mkmf_test_random_nr
+random_nr/path_names_test_random_nr
+random_seq/mkmf_test_diff
+random_seq/path_names_test_diff
+shell_scripts
+system_simulation
+tutorial
