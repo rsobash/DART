@@ -436,7 +436,8 @@ if(select_obstype .eq. 1 .or. select_obstype .eq. 3) then
    beam_direction(2) = cos(beam_az)*cos(elev_obs)
    beam_direction(3) = sin(elev_obs)
 
-   nyquist_velocity = missing_r8
+   ! added negative - read_nyquist_velocity doesnt allow this to be negative (missing_r8=-88888)
+   nyquist_velocity = -missing_r8
 
    call set_radial_vel(defkey, radar_location, beam_direction, nyquist_velocity)
 endif
