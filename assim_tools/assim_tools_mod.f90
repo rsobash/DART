@@ -424,7 +424,10 @@ endif
 
 ! Initialize the method for getting state variables close to a given ob on my process
 if (has_special_cutoffs) then
-   call get_close_maxdist_init(gc_state, 2.0_r8*cutoff, 2.0_r8*cutoff_list)
+! RAS
+   call get_close_maxdist_init(gc_state, 2.0_r8*cutoff, 2.0_r8*cutoff_list, special_localization_obs_types)
+   !call get_close_maxdist_init(gc_state, 2.0_r8*cutoff, 2.0_r8*cutoff_list)
+! RAS
 else
    call get_close_maxdist_init(gc_state, 2.0_r8*cutoff)
 endif
@@ -432,7 +435,10 @@ call get_close_obs_init(gc_state, my_num_state, my_state_loc)
 
 ! Initialize the method for getting obs close to a given ob on my process
 if (has_special_cutoffs) then
-   call get_close_maxdist_init(gc_obs, 2.0_r8*cutoff, 2.0_r8*cutoff_list)
+! RAS
+   call get_close_maxdist_init(gc_obs, 2.0_r8*cutoff, 2.0_r8*cutoff_list, special_localization_obs_types)
+   !call get_close_maxdist_init(gc_obs, 2.0_r8*cutoff, 2.0_r8*cutoff_list)
+! RAS
 else
    call get_close_maxdist_init(gc_obs, 2.0_r8*cutoff)
 endif

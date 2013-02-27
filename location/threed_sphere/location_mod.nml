@@ -9,5 +9,6 @@
    nlat                            = 36,
    output_box_info                 = .false.,
    maintain_original_vert          = .false.,
+   special_vert_norm_height        = 3185000.0, 3185000.0, 1592500.0,
 /
 

@@ -30,7 +30,9 @@ use  utilities_mod, only : register_module, error_handler, E_ERR, ascii_file_for
                            check_namelist_read, do_output, do_nml_file,              &
                            do_nml_term, is_longitude_between
 use random_seq_mod, only : random_seq_type, init_random_seq, random_uniform
-use   obs_kind_mod, only : get_num_obs_kinds, get_obs_kind_name
+! RAS (added get_obs_kind_index to this line)
+use   obs_kind_mod, only : get_num_obs_kinds, get_obs_kind_name, get_obs_kind_index
+! RAS
 use mpi_utilities_mod, only : my_task_id, task_count
 
 implicit none
@@ -150,11 +152,16 @@ integer  :: print_box_level                 = 0
 ! but does nothing now.
 logical  :: num_tasks_insensitive           = .false.
 
+! RAS (declare special_vert_norm_height array, add to NML)
+integer, parameter :: MAX_ITEMS = 300
+real(r8) :: special_vert_norm_height(MAX_ITEMS)
+
 namelist /location_nml/ horiz_dist_only, vert_normalization_pressure, &
    vert_normalization_height, vert_normalization_level,               &
    vert_normalization_scale_height, approximate_distance, nlon, nlat, &
    output_box_info, print_box_level, num_tasks_insensitive,           &
-   maintain_original_vert
+   maintain_original_vert, special_vert_norm_height
+! RAS
 
 !-----------------------------------------------------------------
 
@@ -181,6 +188,10 @@ if (module_initialized) return
 
 call register_module(source, revision, revdate)
 module_initialized = .true.
+
+! RAS (set this array to missing before reading from nml)
+special_vert_norm_height(:) = missing_r8
+! RAS
 
 ! Read the namelist entry
 call find_namelist_in_file("input.nml", "location_nml", iunit)
@@ -1128,11 +1139,19 @@ end subroutine get_close_obs_destroy
 
 !----------------------------------------------------------------------------
 
-subroutine get_close_maxdist_init(gc, maxdist, maxdist_list)
+! RAS (alter call to bring in maxdist_type_list from assim_tools)
+subroutine get_close_maxdist_init(gc, maxdist, maxdist_list, maxdist_type_list)
+!subroutine get_close_maxdist_init(gc, maxdist, maxdist_list)
+! RAS
 
 type(get_close_type), intent(inout) :: gc
 real(r8),             intent(in)    :: maxdist
 real(r8), intent(in), optional      :: maxdist_list(:)
+
+! RAS (define maxdist_type_list and a few other variables)
+character(len=129), intent(in), optional :: maxdist_type_list(:)
+integer :: j, num_special_cutoff, type_index
+! RAS
 
 character(len=129) :: str1
 integer :: i
@@ -1162,6 +1181,27 @@ if (present(maxdist_list)) then
       call error_handler(E_ERR, 'get_close_maxdist_init', errstring, source, revision, revdate)
    endif
    allocate(gc%special_maxdist(gc%num_types))
+
+   ! RAS: DETERMINE NUMBER OF SPECIAL LOCALIZATION TYPES
+   ! IF AN OBS TYPE IS IN special_localization_obs_types BUT DOES NOT HAVE A CORRESPONDING
+   ! ENTRY IN special_vert_norm_height, THE DEFAULT VERT NORM IS USED (vert_normalization_height)
+   j = 0
+   do i = 1, MAX_ITEMS
+    if(maxdist_type_list(i) == 'null') exit
+    if(special_vert_norm_height(i) == MISSING_R8) then
+      special_vert_norm_height(i) = vert_normalization_height
+      !write(errstring, *) 'vert norm value', i, ' is uninitialized.'
+      !call error_handler(E_ERR,'assim_tools_init:', &
+      !                   'special vert norm namelist for types and distances do not match', &
+      !                   source, revision, revdate, &
+      !                   text2='kind = '//trim(maxdist_type_list(i)), &
+      !                   text3=trim(errstring))
+    endif
+    j = j + 1
+   enddo
+   num_special_cutoff = j
+   ! RAS: END DETERMINE NUMBER OF SPECIAL LOCALIZATION TYPES
+
    if (.not.allocated(special_vert_norm)) &
       allocate(special_vert_norm(4, gc%num_types))  ! fill from namelist here, or assim_tools?
   
@@ -1174,6 +1214,28 @@ if (present(maxdist_list)) then
    special_vert_norm(2, :) = vert_normalization_pressure
    special_vert_norm(3, :) = vert_normalization_height
    special_vert_norm(4, :) = vert_normalization_scale_height
+
+   ! RAS: RESET special_vert_norm FOR THOSE WITH SPECIAL VERT NORM FROM NAMELIST
+   ! IF maintain_original_vert = .true. THEN THESE WILL BE RESET...
+   do i = 1, num_special_cutoff
+
+     ! GET OBSERVATION TYPE INDEX
+     type_index = get_obs_kind_index(maxdist_type_list(i))
+     if (type_index < 0) then
+        write(errstring, *) 'unrecognized TYPE_ in the special localization namelist:'
+        call error_handler(E_ERR,'assim_tools_init:', errstring, source, revision, revdate, &
+                         text2=trim(maxdist_type_list(i)))
+     endif
+
+     ! THIS IS ONLY IMPLEMENTED FOR THE HEIGHT VERTICAL COORDINATE
+     special_vert_norm(3, type_index) = special_vert_norm_height(i) ! THE MAGIC HAPPENS HERE
+
+     write(str1,'(A, A32)') 'Altering vertical normalization for type ', maxdist_type_list(i)
+     call error_handler(E_MSG,'location_mod:',str1,source,revision,revdate)
+     write(str1,'(A,f17.5)') '        # meters ~ 1 horiz radian: ', special_vert_norm(3, type_index)
+     call error_handler(E_MSG,'location_mod:',str1,source,revision,revdate)
+   end do
+   ! RAS: END RESET special_vert_norm
 
    ! keep the original vertical distance constant even as you change
    ! the horizontal localization distance.
