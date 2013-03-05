@@ -661,7 +661,8 @@ WRFDomains : do id=1,num_domains
    wrf%dom(id)%type_smois  = get_type_ind_from_type_string(id,'SMOIS')
    wrf%dom(id)%type_sh2o   = get_type_ind_from_type_string(id,'SH2O')
    wrf%dom(id)%type_refl   = get_type_ind_from_type_string(id,'REFL_10CM')
-   wrf%dom(id)%type_fall_spd = get_type_ind_from_type_string(id,'FALL_SPD_Z_WEIGHTED')
+   !wrf%dom(id)%type_fall_spd = get_type_ind_from_type_string(id,'FALL_SPD_Z_WEIGHTED')
+   wrf%dom(id)%type_fall_spd = get_type_ind_from_type_string(id,'VT_DBZ_WT')
    wrf%dom(id)%type_hdiab  = get_type_ind_from_type_string(id,'H_DIABATIC')
 
 enddo WRFDomains 
